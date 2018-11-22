@@ -128,6 +128,36 @@ public class UI {
         }
     }
     
+    private class ResultNumber
+    {
+        private Stage stage;
+        private String result;
+        
+        public ResultNumber(Stage stage)
+        {
+            this.stage = stage;
+            result = "";
+        }
+        
+        public void append(String n)
+        {
+            if (result.indexOf(n+"") != -1)
+            {
+                result = result.substring(0, result.indexOf(n+"")) + result.substring(result.indexOf(n+""));
+            }
+            else
+            {
+                result = result + n;
+            }
+            stage.close();
+        }
+        
+        public String getResult()
+        {
+            return result;
+        }
+    }
+    
     //private class field
     private final Controller controller;
     private final Stage stage;
@@ -219,55 +249,50 @@ public class UI {
                             newStage.initOwner(stage);
                             newStage.initModality(Modality.APPLICATION_MODAL);
                             //create a window for enter value
-                            GridPane newPane = new GridPane();
-                            newPane.setHgap(5);
-                            newPane.setVgap(5);
-                            TextField text = new TextField();
-                            text.setPrefWidth(30);
-                            Button btn = new Button("Enter");
-                            Button btn2 = new Button("Cancel");
-                            Button btn3 = new Button("Clear");
-                            btn3.setPrefWidth(52);
-                            btn.setOnAction(new EventHandler() {
-                                @Override
-                                public void handle(Event event) {
-                                    String str = text.getText();
-                                    if (str != "" && str.length() == 1 && ((int)str.charAt(0) > 48 && (int)str.charAt(0) < 58))
-                                    {
-                                        int value = (int)str.charAt(0)-48;
-                                        controller.addValue(row,column,value);
-                                        newStage.close();
-                                        controller.updateCell();
-                                        controller.checkFinish();
+                            VBox container = new VBox();
+                            container.setSpacing(10);
+                            StackPane[][] numberPane = new StackPane[3][3];
+                            ResultNumber result = new ResultNumber(newStage);
+                            for (int z = 0;z < 3;z++)
+                            for (int zi = 0;zi < 3;zi++)
+                            {
+                                numberPane[z][zi] = new StackPane();
+                                numberPane[z][zi].setPrefSize(100, 100);
+                                numberPane[z][zi].setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(1.5))));
+                                Text txt = new Text((z*3+zi+1)+"");
+                                txt.setFont(Font.font("Verdana", 40));
+                                numberPane[z][zi].addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+                                    @Override
+                                    public void handle(MouseEvent event) {
+                                        result.append(txt.getText());
                                     }
-                                }
-                            });
+                                });
+                                numberPane[z][zi].getChildren().add(txt);
+                            }
+                            Box3x3 numberBox = new Box3x3(numberPane);
+                            //create clear box
+                            StackPane clearBox = new StackPane();
+                            clearBox.setPrefSize(300, 100);
+                            Text txt = new Text("CLEAR");
+                            txt.setFont(Font.font("Verdana", 40));
+                            clearBox.getChildren().add(txt);
+                            clearBox.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+                                    @Override
+                                    public void handle(MouseEvent event) {
+                                        result.append("0");
+                                    }
+                                });
+                            clearBox.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(1.0))));
                             
-                            btn2.setOnAction(new EventHandler() {
-                                @Override
-                                public void handle(Event event) {
-                                    newStage.close();
-                                }
-                            });
-                            
-                            btn3.setOnAction(new EventHandler() {
-                                @Override
-                                public void handle(Event event) {
-                                    boxes[row][column].clear();
-                                    controller.addValue(row, column, 0);
-                                    newStage.close();
-                                    controller.updateCell();
-                                }
-                            });
-                            
-                            newPane.add(text,0,0);
-                            newPane.add(btn,0,1);
-                            newPane.add(btn2,1,1);
-                            newPane.add(btn3,1,0);
-                            
-                            Scene newScene = new Scene(newPane,108,55);
+                            container.getChildren().addAll(numberBox,clearBox);
+                            Scene newScene = new Scene(container,300,410);
                             newStage.setScene(newScene);
                             newStage.showAndWait();
+                            String valueTxt = result.getResult();
+                            int value = (int)valueTxt.charAt(0)-48;
+                            controller.addValue(row,column,value);
+                            controller.updateCell();
+                            controller.checkFinish();
                         }
                     }
                 });

@@ -119,14 +119,7 @@ public class Controller {
         for (int i = 0;i<9;i++)
             for (int j = 0;j<9;j++)
                 cells[i][j] = game.getValue(i, j);
-        boolean check = recursiveSolution(cells);
-        for (int i = 0;i<9;i++)
-        {
-            for (int j = 0;j<9;j++)
-                System.out.print(cells[i][j]);
-            System.out.println();
-        }
-        return check;
+        return recursiveSolution(cells);
     }
 
     private boolean recursiveSolution(int[][] cells) {
