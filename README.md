@@ -13,3 +13,4 @@ Current feature
 - Create new game.
 - Timer.
 - Undo action.
+- Choosing number for cells.

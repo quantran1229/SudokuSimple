@@ -1,6 +1,7 @@
 package sudoku;
 
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -132,11 +133,32 @@ public class UI {
     {
         private Stage stage;
         private String result;
+        private Thread timer;
         
         public ResultNumber(Stage stage)
         {
             this.stage = stage;
             result = "";
+            timer = new Thread(new Task() {
+                @Override
+                protected Object call() throws Exception {
+                    int i = 0;
+                    while (i<5)
+                    {
+                        Thread.sleep(1000);
+                        i++;
+                    }
+                    Platform.runLater(new Runnable(){
+                        @Override
+                        public void run() {
+                            append("");
+                            stage.close();
+                        }
+                    });
+                    return null;
+                }
+            });
+            timer.start();
         }
         
         public void append(String n)
@@ -150,6 +172,7 @@ public class UI {
                 result = result + n;
             }
             stage.close();
+            if (timer.isAlive()) timer.interrupt();
         }
         
         public String getResult()
@@ -224,11 +247,6 @@ public class UI {
         stage.show();
     }
     
-    public void resetBoxes()
-    {
-        mainPane.setCenter(new Button("A"));
-    }
-    
     public void createBoxes(int[][] cells)
     {
         boxes = new Box[9][9];
@@ -282,17 +300,20 @@ public class UI {
                                         result.append("0");
                                     }
                                 });
-                            clearBox.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(1.0))));
+                            clearBox.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(1.5))));
                             
                             container.getChildren().addAll(numberBox,clearBox);
                             Scene newScene = new Scene(container,300,410);
                             newStage.setScene(newScene);
                             newStage.showAndWait();
                             String valueTxt = result.getResult();
-                            int value = (int)valueTxt.charAt(0)-48;
-                            controller.addValue(row,column,value);
-                            controller.updateCell();
-                            controller.checkFinish();
+                            if (valueTxt.length() > 0)
+                            {
+                                int value = (int)valueTxt.charAt(0)-48;
+                                controller.addValue(row,column,value);
+                                controller.updateCell();
+                                controller.checkFinish();
+                            }
                         }
                     }
                 });
