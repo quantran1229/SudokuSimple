@@ -5,6 +5,7 @@
  */
 package sudoku;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Random;
 import javafx.concurrent.Task;
@@ -19,12 +20,28 @@ public class Controller {
         private int row;
         private int column;
         private int value;
+        private int[] values;
+        private boolean isAnswer;
         
         public Step(int r,int c,int v)
         {
             row = r;
             column = c;
             value = v;
+            isAnswer = true;
+        }
+        
+        public Step(int r,int c,int[] v)
+        {
+            isAnswer = false;
+            row = r;
+            column = c;
+            values = v;
+        }
+        
+        public boolean isAnswer()
+        {
+            return isAnswer;
         }
         
         public int getRow()
@@ -40,6 +57,11 @@ public class Controller {
         public int getValue()
         {
             return value;
+        }
+        
+        public int[] getValues()
+        {
+            return values;
         }
     }
     
@@ -177,18 +199,71 @@ public class Controller {
         if (!steps.isEmpty())
         {
             Step undo = steps.pollLast();
-            game.setValue(undo.getRow(), undo.getColumn(), undo.getValue());
-            ui.changeValue(undo.getRow(), undo.getColumn(), undo.getValue());
+            if (undo.isAnswer)
+            {
+                game.setValue(undo.getRow(), undo.getColumn(), undo.getValue());
+                ui.changeValue(undo.getRow(), undo.getColumn(), undo.getValue());
+            }
+            else
+            {
+                ui.changeValue(undo.getRow(), undo.getColumn(), undo.getValue());
+                game.setGuessValue(undo.getRow(), undo.getColumn(), undo.getValues());
+                ui.changeGuessValue(undo.getRow(), undo.getColumn(), undo.getValues());
+            }
             updateCell();
         }
     }
     
     public void addValue(int row, int column, int value) {
-        steps.add(new Step(row,column,game.getValue(row, column)));
+        setOldStep(row,column);
+        game.setGuessValue(row, column, new int[0]);//reset guess
         game.setValue(row, column, value);
         ui.changeValue(row, column, value);
     }
 
+    private void setOldStep(int row,int column)
+    {
+        if (game.getValue(row, column) != 0)
+        {
+            steps.add(new Step(row,column,game.getValue(row, column)));
+        }
+        else
+            if (game.getGuessValue(row, column).size()!= 0)
+            {
+                int[] oldValue = new int[game.getGuessValue(row, column).size()];
+                for (int i = 0;i<oldValue.length;i++)
+                {
+                    oldValue[i] = (int)game.getGuessValue(row, column).get(i);
+                    System.out.print(oldValue[i]);
+                }
+                System.out.println();
+                steps.add(new Step(row,column,oldValue));
+            }
+        else
+            {
+                steps.add(new Step(row,column,0));
+            }
+    }
+    
+    public void addGuess(int row,int column,int[] values)
+    {
+        setOldStep(row,column);
+        
+        game.setValue(row, column, 0);//reset value
+        for (int i = 0;i< values.length;i++)
+        {
+            game.setGuessValue(row, column, values[i]);
+        }
+        ui.changeGuessValue(row,column,values);
+        System.out.println(game.getGuessValue(row, column).toString());
+    }
+    
+    public ArrayList getGuess(int row,int column)      
+    {
+        System.out.println(game.getGuessValue(row, column).toString());
+        return game.getGuessValue(row, column);
+    }
+    
     public void updateCell() {
         ui.updateCell();
     }
@@ -196,6 +271,11 @@ public class Controller {
     public boolean check(int row,int column)
     {
         return game.check(row, column, game.getValue(row, column));
+    }
+    
+    public boolean check(int row,int column,int value)
+    {
+        return game.check(row, column, value);
     }
 
     public int checkFinish() {

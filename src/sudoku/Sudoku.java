@@ -6,6 +6,7 @@
 package sudoku;
 
 import javafx.application.Application;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 /**
@@ -16,7 +17,8 @@ public class Sudoku extends Application {
     
     @Override
     public void start(Stage primaryStage) {
-       primaryStage.setTitle("Ngan's Sudoku");
+       primaryStage.setTitle("Simple Sudoku");
+       primaryStage.getIcons().add(new Image("sudoku/css/icon.png"));
        primaryStage.setResizable(false);
        Controller controller = new Controller();
        UI ui = new UI(primaryStage,controller);

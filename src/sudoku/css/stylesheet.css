@@ -1,0 +1,15 @@
+.root{
+    -fx-background-color: #7FFFD4;
+}
+
+.cell{
+    -fx-background-color: white;
+}
+
+.cell:hover{
+    -fx-background-color: #E0FFFF;
+}
+
+.cell:pressed{
+    -fx-background-color: #AFEEEE;
+}

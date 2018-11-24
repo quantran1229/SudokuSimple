@@ -1,0 +1,15 @@
+.root{
+    -fx-background-color: transparent;
+}
+
+.number{
+    -fx-background-color: Ivory;
+}
+
+.number:hover{
+    -fx-background-color: Linen;
+}
+
+.number:pressed{
+    -fx-background-color: AntiqueWhite;
+}
